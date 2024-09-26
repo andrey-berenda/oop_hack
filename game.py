@@ -8,6 +8,9 @@ class Thing:
         self.attack_power = attack_power
         self.health_point = health_point
 
+    def __repr__(self):
+        return f'{self.name} (Защита: {self.defense_percent*100}%, Атака: {self.attack_power}, Здоровье: {self.health_point})'
+
 
 def create_things():
     things = []
@@ -25,12 +28,15 @@ class Person:
         self.health_point = 100
         self.attack_power = 100
         self.defense = 1
-        self.things = []
 
     def set_things(self, things):
         self.things = things
+        print(f'{self.name} получил следующие вещи:')
         for thing in things:
             self.defense += thing.defense_percent
+            self.attack_power += thing.attack_power
+            self.health_point += thing.health_point
+            print(f'- {thing}')
 
     def calculate_health(self, attack_power):
         self.health_point -= attack_power - (attack_power / 100 * self.defense)
@@ -94,7 +100,6 @@ def create_palladins():
 
 
 things = create_things()
-
 
 fighters = create_warriors() + create_palladins()
 
