@@ -53,43 +53,21 @@ class Warrior(Person):
 
 def create_warriors():
     warriors = []
-    names = [
-        'war1',
-        'war2',
-        'war3',
-        'war4',
-        'war5',
-        'war6',
-        'war7',
-        'war8',
-        'war9',
-        'war10',
-    ]
-    for person in range(10):
+    for person in range(2):
+        names = ['war1', 'war2']
         war = Warrior(name=names[0])
         warriors.append(war)
-        names.remove(names[0])
+        del names[0]
     return warriors
 
 
 def create_palladins():
     palladins = []
-    names = [
-        'pal1',
-        'pal2',
-        'pal3',
-        'pal4',
-        'pal5',
-        'pal6',
-        'pal7',
-        'pal8',
-        'pal9',
-        'pal10',
-    ]
-    for person in range(10):
+    for person in range(2):
+        names = ['pal1', 'pal2']
         war = Paladin(name=names[0])
         palladins.append(war)
-        names.remove(names[0])
+        del names[0]
     return palladins
 
 
