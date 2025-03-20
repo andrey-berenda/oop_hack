@@ -76,15 +76,15 @@ class Thing:
 
 class Person:
     def __init__(
-            self,
-            name=None,
-            base_health=100,
-            base_attack=10,
-            base_armor=0.01,
-            inventory=None,
-            damage=None,
-            additionally_protection=None,
-            ):
+        self,
+        name=None,
+        base_health=100,
+        base_attack=10,
+        base_armor=0.01,
+        inventory=None,
+        damage=None,
+        additionally_protection=None,
+    ):
         self.name = name
         self.base_health = base_health
         self.base_attack = base_attack
@@ -93,6 +93,17 @@ class Person:
         self.all_armor = self.all_protection(additionally_protection or 0)
         self.inventory = self.set_things(inventory or [])
         self.additionally_protection = additionally_protection or 0
+
+    def set_things(self, things):
+        number_of_things = randint(1, 4)
+        for _ in range(number_of_things + 1):
+            thing = choice(things)
+            self.health += thing.health
+            self.all_armor *= thing.protection_percent
+            self.all_attack += thing.attack
+
+    def take_damage(self, damage):
+        self.health -= damage - damage * self.all_armor
 
     def set_things(self, inventory):
         pass
@@ -121,3 +132,40 @@ class Warrior(Person):
         self.attack = self.base_attack * 2
 
 
+def create_things():
+    things = []
+
+    for _ in range(40):
+        things.append(Thing())
+    print(vars(things[0]))
+    return things.sort(key=lambda x: x.protection_percent)
+
+
+def create_personages():
+    classes = [Paladin, Warrior]
+    personages = []
+    for _ in range(10):
+        RandomClass = choice(classes)
+        personages.append(RandomClass())
+    return personages
+
+
+def main():
+    things = create_things()
+    personages = create_personages()
+    for pesonage in personages:
+        pesonage.set_things(things)
+    while True:
+        attacker = choice(personages)
+        others = [person for person in personages if person != attacker]
+        defender = choice(others)
+        defender.take_damage(attacker.all_attack)
+        if defender.health <= 0:
+            personages.remove(defender)
+        if len(personages) == 1:
+            print(f'{personages[0].name} победил!')
+            break
+
+
+if __name__ == '__main__':
+    main()
