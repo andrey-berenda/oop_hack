@@ -61,17 +61,17 @@ class Thing:
     def __init__(self):
         self.name = choice(names_of_things)
         self.protection_percent = self.define_protection_percent()
-        self.attack = self.define_attack
-        self.health = self.define_health
+        self.attack = self.define_attack()
+        self.health = self.define_health()
 
     def define_protection_percent(self):
-        self.protection_percent = randint(1, 10) / 100
+        return randint(1, 10) / 100
 
     def define_attack(self):
-        self.attack = randint(1, 10)
+        return randint(1, 10)
 
     def define_health(self):
-        self.health = randint(1, 10)
+        return randint(1, 10)
 
 
 class Person:
@@ -82,89 +82,79 @@ class Person:
         base_attack=10,
         base_armor=0.01,
         inventory=None,
-        damage=None,
-        additionally_protection=None,
+        damage=0,
+        additionally_protection=0
     ):
-        self.name = name
-        self.base_health = base_health
-        self.base_attack = base_attack
-        self.base_armor = base_armor
-        self.all_attack = self.take_damage(damage or 0)
-        self.all_armor = self.all_protection(additionally_protection or 0)
-        self.inventory = self.set_things(inventory or [])
-        self.additionally_protection = additionally_protection or 0
+        self.name = name or choice(names_of_persons)
+        self.all_attack = base_attack
+        self.all_armor = base_armor
+        self.health = base_health
+        self.inventory = inventory or []
+        self.additionally_protection = additionally_protection
 
     def set_things(self, things):
         number_of_things = randint(1, 4)
-        for _ in range(number_of_things + 1):
+        for _ in range(number_of_things):
             thing = choice(things)
+            self.inventory.append(thing)
             self.health += thing.health
-            self.all_armor *= thing.protection_percent
+            self.all_armor *= (1 + thing.protection_percent)
             self.all_attack += thing.attack
 
     def take_damage(self, damage):
-        self.health -= damage - damage * self.all_armor
+        actual_damage = damage * (1 - self.all_armor)
+        self.health -= max(actual_damage, 0)
 
-    def set_things(self, inventory):
-        pass
-
-    def take_damage(self, damage):
-        self.base_attack = self.base_attack + damage
-
-    def all_protection(self, additionally_protection):
-        self.base_armor = self.base_armor + additionally_protection
+    def all_protection(self):
+        self.all_armor += self.additionally_protection
 
 
 class Paladin(Person):
     def __init__(self):
-        super().__init__(
-            choice(names_of_persons),
-        )
-        self.armor = self.base_armor * 2
-        self.health = self.base_health * 2
+        super().__init__()
+        self.all_armor *= 2
+        self.health *= 2
 
 
 class Warrior(Person):
     def __init__(self):
-        super().__init__(
-            choice(names_of_persons),
-        )
-        self.attack = self.base_attack * 2
+        super().__init__()
+        self.all_attack *= 2
 
 
 def create_things():
-    things = []
-
-    for _ in range(40):
-        things.append(Thing())
-    print(vars(things[0]))
-    return things.sort(key=lambda x: x.protection_percent)
+    things = [Thing() for _ in range(41)]
+    return sorted(things, key=lambda x: x.protection_percent, reverse=True)
 
 
 def create_personages():
     classes = [Paladin, Warrior]
-    personages = []
-    for _ in range(10):
-        RandomClass = choice(classes)
-        personages.append(RandomClass())
-    return personages
+    return [choice(classes)() for _ in range(10)]
 
 
 def main():
     things = create_things()
     personages = create_personages()
-    for pesonage in personages:
-        pesonage.set_things(things)
-    while True:
+
+    for personage in personages:
+        personage.set_things(things)
+
+    while len(personages) > 1:
         attacker = choice(personages)
-        others = [person for person in personages if person != attacker]
-        defender = choice(others)
-        defender.take_damage(attacker.all_attack)
+        defender = choice([p for p in personages if p != attacker])
+
+        damage = max(attacker.all_attack * (1 - defender.all_armor), 0)
+        defender.take_damage(damage)
+
+        print(f'{attacker.name} атакует {defender.name},'
+              f'нанося {damage:.1f} урона!')
+        print(f'У {defender.name} осталось {defender.health:.1f} HP')
+
         if defender.health <= 0:
+            print(f'{defender.name} погиб!')
             personages.remove(defender)
-        if len(personages) == 1:
-            print(f'{personages[0].name} победил!')
-            break
+
+    print(f'{personages[0].name} победил!')
 
 
 if __name__ == '__main__':
